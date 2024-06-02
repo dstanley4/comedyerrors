@@ -1,0 +1,3 @@
+# Preface {.unnumbered}
+
+This is a Quarto book created to present supplemental activities for the article "The Comedy of Measurement Errors" by David J. Stanley and Jeffrey R. Spence.

@@ -1,0 +1,342 @@
+[
+  {
+    "objectID": "bivariate_regression.html",
+    "href": "bivariate_regression.html",
+    "title": "3  Bivariate Regression: A Lens for Understanding Intervals",
+    "section": "",
+    "text": "3.1 Model\nWe make a regression predicting \\(y\\) using \\(x\\) with the code below. Notice the regression line has a slope of .80 and an intercept of 20.\n# Will use the generic labels of y and x in the regression demonstration\n# We create variables with these labels\ny &lt;- true\nx &lt;- observed\n\n# Create the regression model relating x to y using the lm() command. lm() is linear model.\nmy_model &lt;- lm(y ~ x)\nprint(my_model)\n\n\nCall:\nlm(formula = y ~ x)\n\nCoefficients:\n(Intercept)            x  \n       20.0          0.8",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Bivariate Regression: A Lens for Understanding Intervals</span>"
+    ]
+  },
+  {
+    "objectID": "bivariate_regression.html#model",
+    "href": "bivariate_regression.html#model",
+    "title": "3  Bivariate Regression: A Lens for Understanding Intervals",
+    "section": "",
+    "text": "3.1.1 Using the Model: Predicted Values\nWe graph the relation between \\(x\\)-values and \\(y\\)-values with the code below. We include the regression line described in the output above using the geom_smooth() command. Warning: This make take a few minutes to plot.\n\n# Create a data frame (spreadsheet style) version of the data\nmy_df &lt;- data.frame(y, x)\n\n# Plot the data and use geom_smooth() \n# to show regression line\nggplot(data = my_df,\n       mapping = aes(x = x,\n                     y = y)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  theme_classic(18)\n\n\n\n\n\n\n\n\n\n\n\n\n3.1.2 Predicted Values With the Regression Equation\nUsing \\(x=120\\) we create a predicted value for \\(y\\) (i.e., a \\(\\hat{y}-value\\)) for the graph above. This predicted value is the spot on the regression line above \\(x=120\\). We do so with knowledge of the full regression equation, including the intercept.\n\nb = 0.80 # the slope\nintercept = 20\nyhat = b*(120) + intercept\nprint(yhat)\n\n[1] 116\n\n\n\n\n3.1.3 Predicted Values Without the Regression Equation\nA predicted value can be created without a regression equation - as explained in the paper. As before, using \\(x=120\\) we create a predicted value for \\(y\\) (i.e., a \\(\\hat{y}-value\\)) for the graph above. We do so WITHOUT knowledge of the full regression equation - we do not know the intercept but we do know the mean of \\(x\\) and the mean of \\(y\\). The regression line will always run through the point (\\(\\bar{x}, \\bar{y}\\)) - so this is used as a frame of reference. Because we do not know true scores in an applied context, we use this approach to generated predicted values for measurement intervals.\n\nb = 0.80 # the slope\nyhat = mean(y) + b*(120 - mean(x))\nprint(yhat)\n\n[1] 116\n\n\n\n\n3.1.4 Interpretion of Predicted Values\nThe predicted value of \\(y\\) (i.e., \\(\\hat{y}-value\\)) is an estimate of the mean value of \\(y\\) for those test takers with the specified value of \\(x\\). In this example \\(x = 120\\). For participants with score of 120 on the \\(x\\)-axis we calculate the mean value of their \\(y\\) scores. We see the resulting mean is the same as the \\(\\hat{y}-value\\) above.\n\npeople_with_x_equal_120 &lt;- round(x) == 120\n\n# mean y-value for these people\nprint( mean( y[people_with_x_equal_120] ) )\n\n[1] 115.9464\n\n\nIn the previous step, we estimated a mean \\(y\\)-value as \\(\\hat{y}=116\\) for people with an observed score of 120. In this simulation we correspondingly found a mean \\(y\\)-value of 116 (rounded).",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Bivariate Regression: A Lens for Understanding Intervals</span>"
+    ]
+  },
+  {
+    "objectID": "bivariate_regression.html#errors",
+    "href": "bivariate_regression.html#errors",
+    "title": "3  Bivariate Regression: A Lens for Understanding Intervals",
+    "section": "3.2 Errors",
+    "text": "3.2 Errors\nNotice in the output below that residual standard error is 4.47. This value is the standard deviation of the residuals around the regression line.\n\nsummary(my_model)\n\n\nCall:\nlm(formula = y ~ x)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-20.8089  -3.0177  -0.0016   3.0176  21.6884 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 20.00000    0.04025   496.9   &lt;2e-16 ***\nx            0.80000    0.00040  2000.0   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 4.472 on 999998 degrees of freedom\nMultiple R-squared:    0.8, Adjusted R-squared:    0.8 \nF-statistic: 4e+06 on 1 and 999998 DF,  p-value: &lt; 2.2e-16\n\n\nWe can obtain the same 4.47 value using the equation below. This equation is central to the derivation of the error equations for Standard Error of Estimation and Standard Error of Measurement.\n\nyhat_residual_sd_everyone = sd(y) * sqrt(1 - cor(x,y)^2) \n\nprint(yhat_residual_sd_everyone)\n\n[1] 4.472136",
+    "crumbs": [
+      "<span class='chapter-number'>3</span>  <span class='chapter-title'>Bivariate Regression: A Lens for Understanding Intervals</span>"
+    ]
+  },
+  {
+    "objectID": "setup.html",
+    "href": "setup.html",
+    "title": "1  Create Data for Activities",
+    "section": "",
+    "text": "1.1 Install packages\nA few R package are needed for these activities. The install.package() commands below only needs to be run once per machine.\ninstall.packages(\"tidyverse\", dep = TRUE)\ninstall.packages(\"broom\", dep = TRUE)\ninstall.packages(\"MASS\", dep = TRUE)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Create Data for Activities</span>"
+    ]
+  },
+  {
+    "objectID": "setup.html#activate-packages",
+    "href": "setup.html#activate-packages",
+    "title": "1  Create Data for Activities",
+    "section": "1.2 Activate packages",
+    "text": "1.2 Activate packages\nThe library() commands below need to be run during each R session – they activate the packages:\n\nlibrary(tidyverse)\nlibrary(broom)\nlibrary(MASS)",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Create Data for Activities</span>"
+    ]
+  },
+  {
+    "objectID": "setup.html#create-demonstration-data",
+    "href": "setup.html#create-demonstration-data",
+    "title": "1  Create Data for Activities",
+    "section": "1.3 Create Demonstration Data",
+    "text": "1.3 Create Demonstration Data\nClassical test theory is a population-level theory. Consequently, in these demonstrations we use a large number of test takers (i.e., 1,000,000 test takers). In the code below we create true score and random meansurement errors. The true scores have mean of 100 and a standard deviation of 10; which is a variance of 100. Errors have a mean of zero and a standard deviation of 5; which is a variance of 25. The standard deviation of 5 for the errors represents the Standard Error of Measurement - as will become evident later in these activities. An assumption of classical test theory is that the errors are uncorrelated with true scores. We create data below based on this assumption – a covariance of zero is consistent with a correlation of zero.\n\n# Mean of 100 for true score and mean of 0 for errors\nmeans = c(100,0)\n\n# Specify variances and covariances. \n# A covariance of zero means the correlation between\n# true scores and errors is zero. The 100 indicates a\n# variance of 100 for true scores. The 25 indicates\n# a variance of 25 for errors.\ncovariance_matrix = matrix(c(100,0, 0,25), nrow = 2)\n\n# Create the score as per specifications\nset.seed(1) # random number seed\nscores &lt;- mvrnorm(n = 1000000,\n                  mu = means,\n                  Sigma = covariance_matrix,\n                  empirical = TRUE)\n\ntrue  &lt;- scores[,1]\nerror &lt;- scores[,2]\nobserved &lt;- true + error\n\nAs noted, an assumption of classical test theory is that true scores and errors are uncorrelated. We confirm this below:\n\ncor(true, error)\n\n[1] 4.75564e-15",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Create Data for Activities</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html",
+    "href": "classical_test.html",
+    "title": "2  Classical Test Theory",
+    "section": "",
+    "text": "2.1 Classical Test Theory Implication 1\nPart 1: \\(r_{xx} = \\frac{\\sigma_{\\text{true}}^2}{\\sigma_{\\text{observed}}^2}\\)\nprint( var(true) )\n\n[1] 100\n\nprint( var(observed) )\n\n[1] 125\n\nrxx = var(true) / var(observed)\nprint( rxx )\n\n[1] 0.8\nPart 2: \\(\\sqrt{r_{xx}} = \\frac{\\sigma_{\\text{true}}}{\\sigma_{\\text{observed}}}\\)\nprint( sqrt(rxx) )\n\n[1] 0.8944272\n\nprint( sd(true) / sd(observed) )\n\n[1] 0.8944272",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html#classical-test-theory-implication-2",
+    "href": "classical_test.html#classical-test-theory-implication-2",
+    "title": "2  Classical Test Theory",
+    "section": "2.2 Classical Test Theory Implication 2",
+    "text": "2.2 Classical Test Theory Implication 2\n\\(\\sigma_{\\text{observed}}^2r_{xx} = \\sigma_{\\text{true}}^2\\)\n\nprint( rxx * var(observed) )\n\n[1] 100\n\nprint( var(true) )\n\n[1] 100",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html#classical-test-theory-implication-3",
+    "href": "classical_test.html#classical-test-theory-implication-3",
+    "title": "2  Classical Test Theory",
+    "section": "2.3 Classical Test Theory Implication 3",
+    "text": "2.3 Classical Test Theory Implication 3\nPart 1: \\(r_{xx} = r_{\\text{(observed, true)}}^2\\)\n\nprint( rxx )\n\n[1] 0.8\n\nprint( cor(observed, true)^2 )\n\n[1] 0.8\n\n\nPart 2: \\(\\sqrt{r_{xx}} = r_{\\text{(observed, true)}}\\)\n\nprint( sqrt(rxx) )\n\n[1] 0.8944272\n\nprint( cor(observed, true) )\n\n[1] 0.8944272",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html#classical-test-theory-implication-4",
+    "href": "classical_test.html#classical-test-theory-implication-4",
+    "title": "2  Classical Test Theory",
+    "section": "2.4 Classical Test Theory Implication 4",
+    "text": "2.4 Classical Test Theory Implication 4\n\\(r_{xx}= 1 - \\frac{\\sigma_{\\text{error}}^2}{\\sigma_{\\text{observed}}^2}\\)\n\nprint( rxx )\n\n[1] 0.8\n\nprint( 1 - var(error)/var(observed) )\n\n[1] 0.8",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html#classical-test-theory-implication-5",
+    "href": "classical_test.html#classical-test-theory-implication-5",
+    "title": "2  Classical Test Theory",
+    "section": "2.5 Classical Test Theory Implication 5",
+    "text": "2.5 Classical Test Theory Implication 5\n\\(\\overline{\\text{true}} = \\overline{\\text{observed}}\\)\n\nprint( mean(true) )\n\n[1] 100\n\nprint( mean(observed) )\n\n[1] 100",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html#model",
+    "href": "classical_test.html#model",
+    "title": "2  Classical Test Theory",
+    "section": "3.1 Model",
+    "text": "3.1 Model\nWe make a regression predicting \\(y\\) using \\(x\\) with the code below. Notice the regression line has a slope of .80 and an intercept of 20.\n\n# Will use the generic labels of y and x in the regression demonstration\n# We create variables with these labels\ny &lt;- true\nx &lt;- observed\n\n# Create the regression model relating x to y using the lm() command. lm() is linear model.\nmy_model &lt;- lm(y ~ x)\nprint(my_model)\n\n\nCall:\nlm(formula = y ~ x)\n\nCoefficients:\n(Intercept)            x  \n       20.0          0.8  \n\n\n\n3.1.1 Using the Model: Predicted Values\nWe graph the relation between \\(x\\)-values and \\(y\\)-values with the code below. We include the regression line described in the output above using the geom_smooth() command. Warning: This make take a few minutes to plot.\n\n# Create a data frame (spreadsheet style) version of the data\nmy_df &lt;- data.frame(y, x)\n\n# Plot the data and use geom_smooth() \n# to show regression line\nggplot(data = my_df,\n       mapping = aes(x = x,\n                     y = y)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  theme_classic(18)\n\n\n\n\n\n\n\n\n\n\n\n\n3.1.2 Predicted Values With the Regression Equation\nUsing \\(x=120\\) we create a predicted value for \\(y\\) (i.e., a \\(\\hat{y}-value\\)) for the graph above. This predicted value is the spot on the regression line above \\(x=120\\). We do so with knowledge of the full regression equation, including the intercept.\n\nb = 0.80 # the slope\nintercept = 20\nyhat = b*(120) + intercept\nprint(yhat)\n\n[1] 116\n\n\n\n\n3.1.3 Predicted Values Without the Regression Equation\nA predicted value can be created without a regression equation - as explained in the paper. As before, using \\(x=120\\) we create a predicted value for \\(y\\) (i.e., a \\(\\hat{y}-value\\)) for the graph above. We do so WITHOUT knowledge of the full regression equation - we do not know the intercept but we do know the mean of \\(x\\) and the mean of \\(y\\). The regression line will always run through the point (\\(\\bar{x}, \\bar{y}\\)) - so this is used as a frame of reference. Because we do not know true scores in an applied context, we use this approach to generated predicted values for measurement intervals.\n\nb = 0.80 # the slope\nyhat = mean(y) + b*(120 - mean(x))\nprint(yhat)\n\n[1] 116\n\n\n\n\n3.1.4 Interpretion of Predicted Values\nThe predicted value of \\(y\\) (i.e., \\(\\hat{y}-value\\)) is an estimate of the mean value of \\(y\\) for those test takers with the specified value of \\(x\\). In this example \\(x = 120\\). For participants with score of 120 on the \\(x\\)-axis we calculate the mean value of their \\(y\\) scores. We see the resulting mean is the same as the \\(\\hat{y}-value\\) above.\n\npeople_with_x_equal_120 &lt;- round(x) == 120\n\n# mean y-value for these people\nprint( mean( y[people_with_x_equal_120] ) )\n\n[1] 115.9464\n\n\nIn the previous step, we estimated a mean \\(y\\)-value as \\(\\hat{y}=116\\) for people with an observed score of 120. In this simulation we correspondingly found a mean \\(y\\)-value of 116 (rounded).",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "classical_test.html#errors",
+    "href": "classical_test.html#errors",
+    "title": "2  Classical Test Theory",
+    "section": "3.2 Errors",
+    "text": "3.2 Errors\nNotice in the output below that residual standard error is 4.47. This value is the standard deviation of the residuals around the regression line.\n\nsummary(my_model)\n\n\nCall:\nlm(formula = y ~ x)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-20.8089  -3.0177  -0.0016   3.0176  21.6884 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 20.00000    0.04025   496.9   &lt;2e-16 ***\nx            0.80000    0.00040  2000.0   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 4.472 on 999998 degrees of freedom\nMultiple R-squared:    0.8, Adjusted R-squared:    0.8 \nF-statistic: 4e+06 on 1 and 999998 DF,  p-value: &lt; 2.2e-16\n\n\nWe can obtain the same 4.47 value using the equation below. This equation is central to the derivation of the error equations for Standard Error of Estimation and Standard Error of Measurement.\n\nyhat_residual_sd_everyone = sd(y) * sqrt(1 - cor(x,y)^2) \n\nprint(yhat_residual_sd_everyone)\n\n[1] 4.472136",
+    "crumbs": [
+      "<span class='chapter-number'>2</span>  <span class='chapter-title'>Classical Test Theory</span>"
+    ]
+  },
+  {
+    "objectID": "see_many.html",
+    "href": "see_many.html",
+    "title": "4  SEE-Many-Test-Takers Interval",
+    "section": "",
+    "text": "4.1 SEE Regression Model\nPreviously, we created true scores and errors as data for this demonstration. Recall that the reliability of these observed scores is \\(r_{xx}=.80\\).\nrxx = var(true)/var(observed)\nprint(rxx)\n\n[1] 0.8\nNow we create the Standard Error of Estimation regression model. In this model, observed scores predict true scores. Notice the slope corresponds to the reliability in the Standard Error of Estimation regression model. This correspondence between slope and reliability does not occur with the Standard Error of Measurement regression model.\nsee_model &lt;- lm(true ~ observed)\nprint(see_model)\n\n\nCall:\nlm(formula = true ~ observed)\n\nCoefficients:\n(Intercept)     observed  \n       20.0          0.8\nThis output above indicates the regression equation:\n\\[\n\\hat{y}_{true} = .80(x_{observed}) + 20\n\\]",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>SEE-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "see_many.html#graphing-the-see-model",
+    "href": "see_many.html#graphing-the-see-model",
+    "title": "4  SEE-Many-Test-Takers Interval",
+    "section": "4.2 Graphing the SEE Model",
+    "text": "4.2 Graphing the SEE Model\nWe graph the relation between observed scores and true scores with the code below. Warning: This make take a few minutes to plot.\n\n# view model and predicted values\nlibrary(ggplot2)\nexample_df &lt;- data.frame(true, observed)\n\nggplot(data = my_df,\n       mapping = aes(x = observed,\n                     y = true)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  ggtitle(\"SEE Regression Model\") +\n  scale_x_continuous(breaks = seq(50, 150, by = 20)) +\n  theme_classic()",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>SEE-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "see_many.html#predicted-values-with-the-regression-equation",
+    "href": "see_many.html#predicted-values-with-the-regression-equation",
+    "title": "4  SEE-Many-Test-Takers Interval",
+    "section": "4.3 Predicted Values With the Regression Equation",
+    "text": "4.3 Predicted Values With the Regression Equation\nThe output above indicated the regression equation:\n\\[\n\\hat{y}_{true} = .80(x_{observed}) + 20\n\\]\nThis equation equation is used to generate the values on the regression line in graph above. Example calculation for a spot on the regression line corresponding to an observed score of 90:\n\\[\n\\begin{aligned}\n\\hat{y}_{true} &= .80(x_{observed}) + 20\\\\\n&= .80(90) + 20\\\\\n&= 92\n\\end{aligned}\n\\]\nThis predicted value is an estimate of the mean true score for those test takers with an observed score of 90.\nKeep in mind, however, that in a applied measurement context, don’t know true scores. Consequently, we cannot generate a regression between true scores and observed scores. This means we don’t know the intercept in the regression equation. As a result, in any applied context we will not have have the full regression equation so this calculation is not possible.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>SEE-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "see_many.html#predicted-values-without-the-regression-equation",
+    "href": "see_many.html#predicted-values-without-the-regression-equation",
+    "title": "4  SEE-Many-Test-Takers Interval",
+    "section": "4.4 Predicted Values Without the Regression Equation",
+    "text": "4.4 Predicted Values Without the Regression Equation\nIn an applied measurement context, we will know the reliability and the mean of the observed scores. This allows us to use an alternative approach to create \\(\\hat{y}_{true}\\)-values.\nWe create a predicted true score (i.e., \\(\\hat{y}_{true}\\)) based on an observed score, the mean observed score, and the reliability (i.e., slope):\n\\[\n\\hat{y}_{true} = \\overline{observed} + r_{xx} (observed - \\overline{observed})\n\\]\nWe obtain a predicted true score (i.e., \\(\\hat{y}-value\\)) of approximately 92 using the equation below based on an observed score of 90. Again, this predicted value is an estimate of the mean true score for those test takers with an observed score of 90.\n\nyhat = mean(observed) + rxx*(90 - mean(observed))\nprint(yhat)\n\n[1] 92\n\n\nWhen we create a Standard Error of Estimation interval for test takers, based on an observed score of 90, it is centered on \\(\\hat{y}=92\\).\nThis spot on the regression line is illustrated in the graph below by the red dot:\n\n# view model and predicted values\nlibrary(ggplot2)\nexample_df &lt;- data.frame(true, observed)\n\nggplot(data = my_df,\n       mapping = aes(x = observed,\n                     y = true)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  ggtitle(\"SEE Regression Model\") +\n  scale_x_continuous(breaks = seq(50, 150, by = 20)) +\n  theme_classic() +\n  annotate(geom = \"point\",\n           x = 90, y = 92,\n           color = \"red\", size = 4)",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>SEE-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "see_many.html#see-errors",
+    "href": "see_many.html#see-errors",
+    "title": "4  SEE-Many-Test-Takers Interval",
+    "section": "4.5 SEE Errors",
+    "text": "4.5 SEE Errors\nThe length of the interval depends on the standard deviation of the residuals around the corresponding spot on the regression line (i.e., the red dot in the graph above). Due to the homoscedasticity assumption the standard deviation of the residuals at that point is equal to the overall standard deviation of the residuals. We obtain the overall standard deviation of the residuals in R output by looking at “Residual Standard Error”. Notice that this value is 4.47 in the output below.\n\nsummary(see_model)\n\n\nCall:\nlm(formula = true ~ observed)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-20.8089  -3.0177  -0.0016   3.0176  21.6884 \n\nCoefficients:\n            Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 20.00000    0.04025   496.9   &lt;2e-16 ***\nobserved     0.80000    0.00040  2000.0   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 4.472 on 999998 degrees of freedom\nMultiple R-squared:    0.8, Adjusted R-squared:    0.8 \nF-statistic: 4e+06 on 1 and 999998 DF,  p-value: &lt; 2.2e-16\n\n\nNotice that we can get an estimate of this value from the SEE-error formula. We use the value below in our Standard Error of Estimation interval calculation.\n\nsd_residual_see = sd(observed)*sqrt( (1-rxx)*rxx)\nprint(sd_residual_see)\n\n[1] 4.472136",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>SEE-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "see_many.html#see-interval",
+    "href": "see_many.html#see-interval",
+    "title": "4  SEE-Many-Test-Takers Interval",
+    "section": "4.6 SEE Interval",
+    "text": "4.6 SEE Interval\nRecall, we started with the intent to make a Standard Error of Estimation interval based on an observed score of 90. Using this, in the above activities, we estimated \\(\\hat{y}\\) (the center of the interval) and \\(s_{residual}\\) which determined the length of the interval:\n\nprint(yhat)\n\n[1] 92\n\nprint(sd_residual_see)\n\n[1] 4.472136\n\n\nWe use these values to calculate the lower limit of the interval:\n\nseeLL = yhat - 1.96 * sd_residual_see\nprint(seeLL)\n\n[1] 83.23461\n\n\nLikewise we calculate the upper limit of the interval:\n\nseeUL = yhat + 1.96 * sd_residual_see\nprint(seeUL)\n\n[1] 100.7654\n\n\nThe result is the 95% SEE [83.23, 100.77] interval. This interval is a range that indicates that for those test takers with an observed score of 90 that 95% of them have true scores between 83.23 and 100.77.\n\n# view model and predicted values\nlibrary(ggplot2)\nmy_df &lt;- data.frame(true, observed)\n\nggplot(data = my_df,\n       mapping = aes(x = observed,\n                     y = true)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  ggtitle(\"SEE Regression Model\") +\n  scale_x_continuous(breaks = seq(50, 150, by = 20)) +\n  theme_classic() +\n  annotate(geom = \"point\",\n           x = 90, y = 92,\n           color = \"red\", size = 4) +\n  annotate(geom = \"segment\",\n           x = 90, xend = 90,\n           y = 83.23, yend = 100.77,\n           color = \"red\", linewidth = 1)\n\n\n\n\n\n\n\n\n\n\nUnfortunately, the above graph makes it appear the 95% SEE interval falls far short of capturing 95% of the true scores corresponding to the \\(x-axis\\) observed score location of 90. This is occurs because the above plot does not convey the density of the points in the cross section where the interval falls on the graph.\nHowever, if we take a cross section of the data at this point, we can see the interval does capture 95% of the points at this spot on the graph.\n\npeople_with_obs_equal_90 &lt;- round(observed) == 90\n\nmy_df_hist &lt;- data.frame(true_scores = true[people_with_obs_equal_90])\n\nggplot(data = my_df_hist,\n       mapping = aes(x =true_scores)) +\n  geom_histogram() +\n  xlab(\"Trues Scores for People With Observed = 90\") +\n  ylab(\"Frequency\") +\n  scale_x_continuous(breaks = seq(60, 110, by = 2)) +\n  ggtitle(\"SEE Regression Model: Cross Section\") +\n  theme_classic() +\n  annotate(geom = \"point\",\n           x = 92, y = 100,\n           color = \"red\", size = 4) +\n  annotate(geom = \"segment\",\n           y = 100, yend = 100,\n           x = 83.23, yend = 100.77,\n           color = \"red\", linewidth = 1)\n\n\n\n\n\n\n\n\n\n\nA visual inspection suggest the interval does capture 95% of values. We can confirm our visual inspection of the above graph with a calculation:\n\npeople_with_obs_equal_90 &lt;- round(observed) == 90\ntrue_scores_people_with_obs_equal_90 = true[people_with_obs_equal_90]\nn_true_scores_for_obs_90 = length(true_scores_people_with_obs_equal_90)\n\nboolean_greater_LL  &lt;- true_scores_people_with_obs_equal_90 &gt;= seeLL\nboolean_less_UL     &lt;- true_scores_people_with_obs_equal_90 &lt;= seeUL\nboolean_in_interval &lt;- boolean_greater_LL & boolean_less_UL \n\nn_in_interval = sum(boolean_in_interval)\npercent_true_in_interval = n_in_interval / n_true_scores_for_obs_90 * 100\n\nprint(percent_true_in_interval)\n\n[1] 95.06885\n\n\nThus, the 95% SEE [83.24, 100.74] captures 95% of the true scores for individuals with an observed score of 90.",
+    "crumbs": [
+      "<span class='chapter-number'>4</span>  <span class='chapter-title'>SEE-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html",
+    "href": "sem_many.html",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "",
+    "text": "5.1 SEM Regression Model\nWe begin by creating the Standard Error of Measurement regression model. In this model true scores predict observed scores. Again, recall that this is a conceptual model only - because we never know true scores. When inspecting the Standard Error of Measurement regression model notice the slope is 1.0 and the intercept is 0.\nsem_model &lt;- lm(observed ~ true)\nprint(sem_model)\n\n\nCall:\nlm(formula = observed ~ true)\n\nCoefficients:\n(Intercept)         true  \n  6.477e-12    1.000e+00\nThis output above indicates the regression equation:\n\\[\n\\hat{y}_{observed} = 1.0(x_{true}) + 0\n\\]",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html#graphing-the-sem-model",
+    "href": "sem_many.html#graphing-the-sem-model",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "5.2 Graphing the SEM Model",
+    "text": "5.2 Graphing the SEM Model\nWe graph the relation between true scores and observed scores with the code below. Warning: This make take a few minutes to plot.\n\n# view model and predicted values\nlibrary(ggplot2)\nexample_df &lt;- data.frame(true, observed)\n\nggplot(data = my_df,\n       mapping = aes(x = true,\n                     y = observed)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  ggtitle(\"SEM Regression Model\") +\n  scale_x_continuous(breaks = seq(50, 150, by = 20)) +\n  theme_classic()",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html#predicted-values",
+    "href": "sem_many.html#predicted-values",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "5.3 Predicted Values",
+    "text": "5.3 Predicted Values\nBecause the slope of the Standard Error of Measurement Model is 1.0 (and the intercept is 0) it is easy to calculate a predicted score. Recall the predictor is true scores and the criterion is observed scores. The mean of the measurement errors is zero; consequently, the predicted observed score is simply the true score. Note, however, that the predicted observed score is the estimated mean of all observed score for individuals with the same (specified) true score.\nWhen we create a Standard Error of Measurement interval for test takers, based on an true score of 90, it is centered on 90 because the expected mean observed score is equal to the true score.\nThis spot on the regression line is illustrated in the graph below by the red dot:\n\n# view model and predicted values\nlibrary(ggplot2)\nexample_df &lt;- data.frame(true, observed)\n\nggplot(data = my_df,\n       mapping = aes(x = true,\n                     y = observed)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  ggtitle(\"SEM Regression Model\") +\n  scale_x_continuous(breaks = seq(50, 150, by = 20)) +\n  theme_classic() +\n  annotate(geom = \"point\",\n           x = 90, y = 90,\n           color = \"red\", size = 4)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html#sem-errors",
+    "href": "sem_many.html#sem-errors",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "5.4 SEM Errors",
+    "text": "5.4 SEM Errors\nThe length of the interval depends on the standard deviation of the residuals around the corresponding spot on the regression line (i.e., the red dot in the graph above). Due to the homoscedasticity assumption the standard deviation of the residuals at that point is equal to the overall standard deviation of the residuals. We obtain the overall standard deviation of the residuals in R output by looking at “Residual Standard Error”. Notice that this value is 5 in the output below.\n\nsummary(sem_model)\n\n\nCall:\nlm(formula = observed ~ true)\n\nResiduals:\n     Min       1Q   Median       3Q      Max \n-23.8157  -3.3769  -0.0027   3.3766  23.8180 \n\nCoefficients:\n             Estimate Std. Error t value Pr(&gt;|t|)    \n(Intercept) 6.477e-12  5.025e-02       0        1    \ntrue        1.000e+00  5.000e-04    2000   &lt;2e-16 ***\n---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n\nResidual standard error: 5 on 999998 degrees of freedom\nMultiple R-squared:    0.8, Adjusted R-squared:    0.8 \nF-statistic: 4e+06 on 1 and 999998 DF,  p-value: &lt; 2.2e-16\n\n\nWe can also get this value of 5 from the SEM-error formula:\n\nsd_residual_sem = sd(observed)*sqrt( (1-rxx) )\nprint(sd_residual_sem)\n\n[1] 5\n\n\nIn the regression output (above) the Standard Error of the Residuals is exactly 5. This value was alternatively calculated by the Standard Error of Measurement formula which provides a value of 5. Both of these correspond the standard deviation of the errors created in our simulation code from Create Demonstration Data (repeated below). In this code we created errors with a variance of 25 which is a standard deviation of 5.\n\n# Mean of 100 for true score and mean of 0 for errors\nmeans = c(100,0)\n\n# Specify variances and covariances. \n# A covariance of zero means the correlation between\n# true scores and errors is zero. The 100 indicates a\n# variance of 100 for true scores. The 25 indicates\n# a variance of 25 for errors.\ncovariance_matrix = matrix(c(100,0, 0,25), nrow = 2)\n\n# Create the score as per specifications\nset.seed(1) # random number seed\nscores &lt;- mvrnorm(n = 1000000,\n                  mu = means,\n                  Sigma = covariance_matrix,\n                  empirical = TRUE)\n\ntrue  &lt;- scores[,1]\nerror &lt;- scores[,2]\nobserved &lt;- true + error\n\nThus, Standard Error of Measurement is the standard deviation of the errors associated with true scores.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html#sem-interval",
+    "href": "sem_many.html#sem-interval",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "5.5 SEM Interval",
+    "text": "5.5 SEM Interval\nRecall that in the above activities we started with 90 as a true score but found that the expected mean observed score is also 90. Likewise, \\(s_{residual}\\) which determines the length of the interval is presented below:\n\nprint(sd_residual_sem)\n\n[1] 5\n\n\nWe combine these values in Standard Error of Measurement regression interval equation.\nWe can calculate the lower limit of the interval:\n\nsemLL = 90 - 1.96 * sd_residual_sem\nprint(semLL)\n\n[1] 80.2\n\n\nThen calculate the upper limit of the interval:\n\nsemUL = 90 + 1.96 * sd_residual_sem\nprint(semUL)\n\n[1] 99.8\n\n\nThe result is a 95% SEM [80.2, 99.8] interval. This interval is a range that indicates that for those test takers with an true score of 90 that 95% of them have observed scores between 80.2 and 99.8.\n\n# view model and predicted values\nlibrary(ggplot2)\nmy_df &lt;- data.frame(true, observed)\n\nggplot(data = my_df,\n       mapping = aes(x = true,\n                     y = observed)) +\n  geom_point(color = \"grey\") +\n  geom_smooth(method = lm,\n              formula = y ~ x,\n              color = \"blue\") +\n  ggtitle(\"SEM Regression Model\") +\n  scale_x_continuous(breaks = seq(50, 150, by = 20)) +\n  theme_classic() +\n  annotate(geom = \"point\",\n           x = 90, y = 90,\n           color = \"red\", size = 4) +\n  annotate(geom = \"segment\",\n           x = 90, xend = 90,\n           y = 80.2, yend = 99.8,\n           color = \"red\", linewidth = 1)\n\n\n\n\n\n\n\n\n\n\nUnfortunately, the above graph makes it appear the 95% SEM interval falls far short of capturing 95% of the observed scores corresponding to the \\(x-axis\\) true score location of 90. This is occurs because the above plot does not convey the density of the points in the cross section where the interval falls on the graph.\nHowever, if we take a cross section of the data at this point, we can see the interval does capture 95% of the points at this spot on the graph.\n\npeople_with_true_equal_90 &lt;- round(true) == 90\n\nmy_df_hist &lt;- data.frame(observed_scores = observed[people_with_true_equal_90])\n\nggplot(data = my_df_hist,\n       mapping = aes(x =observed_scores)) +\n  geom_histogram() +\n  xlab(\"Observed Scores for People With True = 90\") +\n  ylab(\"Frequency\") +\n  scale_x_continuous(breaks = seq(60, 110, by = 10)) +\n  ggtitle(\"SEM Regression Model: Cross Section\") +\n  theme_classic() +\n  annotate(geom = \"point\",\n           x = 90, y = 100,\n           color = \"red\", size = 4) +\n  annotate(geom = \"segment\",\n           y = 100, yend = 100,\n           x = 80.2, yend = 99.8,\n           color = \"red\", linewidth = 1)\n\n\n\n\n\n\n\n\n\n\nA visual inspection suggests the interval captures 95% of values. We can confirm our visual inspection of the above graph with a calculation:\n\npeople_with_true_equal_90 &lt;- round(true) == 90\nobs_scores_people_with_obs_equal_90 = observed[people_with_true_equal_90]\nn_obs_scores_for_true_90 = length(obs_scores_people_with_obs_equal_90)\n\nboolean_greater_LL  &lt;- obs_scores_people_with_obs_equal_90 &gt;= semLL\nboolean_less_UL     &lt;- obs_scores_people_with_obs_equal_90 &lt;= semUL\nboolean_in_interval &lt;- boolean_greater_LL & boolean_less_UL\n\nn_in_interval = sum(boolean_in_interval)\npercent_true_in_interval = n_in_interval / n_obs_scores_for_true_90 * 100\n\nprint(percent_true_in_interval)\n\n[1] 94.85646\n\n\nThus, the 95% SEM [80.22, 99.78] captures 95% of the observed scores for individuals with a true score of 90.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html#information-from-other-test-takers",
+    "href": "sem_many.html#information-from-other-test-takers",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "6.1 Information from Other Test Takers",
+    "text": "6.1 Information from Other Test Takers\nTypically, when we create an interval for a single person it is based on information from other test takers. Specifically, we use the reliability of observed scores and the standard deviation of observed score. Both of these are calculated based on data from other test takers.\nWe we created Bob’s distribution of observed scores we did so using the same error process as we did for the 1,000,000 test takers. Consequently, we use the information from the other test takers discussed previously to calculate Bob’s Standard Error of Measurement interval. Specifically, we use the reliability and standard deviation of observed scores from these other test takers:\n\n# All test takers\nprint( sd(observed) )\n\n[1] 11.18034\n\n# All test takers\nrxx = var(true) / var(observed)\nprint( rxx )\n\n[1] 0.8\n\n\nWe can use this information to calculate the Standard Error of Measurement that we will use for Bob’s interval.\n\nsem = sd(observed) * sqrt(1 - rxx)",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_many.html#bobs-interval",
+    "href": "sem_many.html#bobs-interval",
+    "title": "5  SEM-Many-Test-Takers Interval",
+    "section": "6.2 Bob’s Interval",
+    "text": "6.2 Bob’s Interval\nNow an interval for Bob is:\n\\[\nobserved \\pm 1.96(SEM)\n\\]\nWe can get a specific observed score from Bob:\n\nbob_first_observed_score = all_bob_observed_scores[1]\nprint(bob_first_observed_score)\n\n[1] 86.86808\n\n\nThen, we create an interval centered on that observed score.\n\nLL = bob_first_observed_score - 1.96*sem\nprint(LL)\n\n[1] 77.06808\n\n\n\nUL = bob_first_observed_score + 1.96*sem\nprint(UL)\n\n[1] 96.66808\n\n\nThe resulting 95% SEM [77.07, 96.67] is an interval estimate of Bob’s true score. On average, 95% of the interval estimates will contain a person’s true score. Some people prefer to phrase this as, “With repeated measurement, on average, 19 of 20 (i.e., 95%) of interval estimates will contain the true score.” Consequently, this specific interval, 95% SEM [77.07, 96.67], may or may not contain Bob’s true score. A simulation that demonstrates this interpretation of the SEM confidence interval (based on an observed score) is provide in the Myth #1 section, below.",
+    "crumbs": [
+      "<span class='chapter-number'>5</span>  <span class='chapter-title'>SEM-Many-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_single.html",
+    "href": "sem_single.html",
+    "title": "6  SEM-Single-Test-Takers Interval",
+    "section": "",
+    "text": "6.1 Information from Other Test Takers\nTypically, when we create an interval for a single person it is based on information from other test takers. Specifically, we use the reliability of observed scores and the standard deviation of observed score. Both of these are calculated based on data from other test takers.\nWe we created Bob’s distribution of observed scores we did so using the same error process as we did for the 1,000,000 test takers. Consequently, we use the information from the other test takers discussed previously to calculate Bob’s Standard Error of Measurement interval. Specifically, we use the reliability and standard deviation of observed scores from these other test takers:\n# All test takers\nprint( sd(observed) )\n\n[1] 11.18034\n\n# All test takers\nrxx = var(true) / var(observed)\nprint( rxx )\n\n[1] 0.8\nWe can use this information to calculate the Standard Error of Measurement that we will use for Bob’s interval.\nsem = sd(observed) * sqrt(1 - rxx)",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>SEM-Single-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "sem_single.html#bobs-interval",
+    "href": "sem_single.html#bobs-interval",
+    "title": "6  SEM-Single-Test-Takers Interval",
+    "section": "6.2 Bob’s Interval",
+    "text": "6.2 Bob’s Interval\nNow an interval for Bob is:\n\\[\nobserved \\pm 1.96(SEM)\n\\]\nWe can get a specific observed score from Bob:\n\nbob_first_observed_score = all_bob_observed_scores[1]\nprint(bob_first_observed_score)\n\n[1] 86.86808\n\n\nThen, we create an interval centered on that observed score.\n\nLL = bob_first_observed_score - 1.96*sem\nprint(LL)\n\n[1] 77.06808\n\n\n\nUL = bob_first_observed_score + 1.96*sem\nprint(UL)\n\n[1] 96.66808\n\n\nThe resulting 95% SEM [77.07, 96.67] is an interval estimate of Bob’s true score. On average, 95% of the interval estimates will contain a person’s true score. Some people prefer to phrase this as, “With repeated measurement, on average, 19 of 20 (i.e., 95%) of interval estimates will contain the true score.” Consequently, this specific interval, 95% SEM [77.07, 96.67], may or may not contain Bob’s true score. A simulation that demonstrates this interpretation of the SEM confidence interval (based on an observed score) is provide in the Myth #1 section, below.",
+    "crumbs": [
+      "<span class='chapter-number'>6</span>  <span class='chapter-title'>SEM-Single-Test-Takers Interval</span>"
+    ]
+  },
+  {
+    "objectID": "myths.html",
+    "href": "myths.html",
+    "title": "7  Four Measurement Myths",
+    "section": "",
+    "text": "7.1 Myth Simulation Setup\nRecall, our simulation scenario where:\nmean_true = 100\nvar_true = 100\n\nvar_error = 25\nsd_error = sqrt(var_error)\n\nvar_obs = var_true + var_error\nsd_obs = sqrt(var_obs)\nmean_obs = mean_true # because mean error is zero\n  \n#This corresponds to a reliability of .80 \nrxx = var_true/var_obs\nprint(rxx)\n\n[1] 0.8\nNow, let’s imagine Bob who has a true score of 90. Then, we create 1,000,000 observed scores for Bob.\nset.seed(1)\n\nbob_true_score = 90\n\nerror &lt;- as.numeric(scale(rnorm(n = 1000000)))*5\n\nall_bob_observed_scores &lt;- bob_true_score + error\nWhat is the range of Bob’s observed scores? With a true score of 90 and a reliability of .80 Bob’s observed score range from 65.59365 to 113.25018.\nmin_obs &lt;- min(all_bob_observed_scores)\nprint(min_obs)\n\n[1] 65.59365\n\nmax_obs &lt;- max(all_bob_observed_scores)\nprint(max_obs)\n\n[1] 113.2502",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Four Measurement Myths</span>"
+    ]
+  },
+  {
+    "objectID": "myths.html#myth-1-there-is-a-95-chance-your-true-score-is-in-your-interval",
+    "href": "myths.html#myth-1-there-is-a-95-chance-your-true-score-is-in-your-interval",
+    "title": "7  Four Measurement Myths",
+    "section": "7.2 Myth 1: There is a 95% chance your true score is in your interval",
+    "text": "7.2 Myth 1: There is a 95% chance your true score is in your interval\nBe sure you have run all of the code in Myth Simulation Setup prior to the code below.\n\nn_all_bob_observed_scores &lt;- length(all_bob_observed_scores)\n\nis_bob_true_score_in_interval = rep(FALSE, n_all_bob_observed_scores)\n\nfor (i in 1:n_all_bob_observed_scores) {\n  cur_observed_for_bob &lt;- all_bob_observed_scores[i]\n  \n  sem = sd_obs*sqrt(1-rxx)\n  LL = cur_observed_for_bob - 1.96 * sem\n  UL = cur_observed_for_bob + 1.96 * sem\n\n  if (bob_true_score &lt;= UL) {\n    if (bob_true_score &gt;= LL) {\n        is_bob_true_score_in_interval[i] &lt;- TRUE\n    }\n  }  \n}\n\nn_bob_true_score_in_interval &lt;- sum(is_bob_true_score_in_interval)\n\n\npercent_true_score_in_interval &lt;- n_bob_true_score_in_interval / n_all_bob_observed_scores * 100\nprint(percent_true_score_in_interval)\n\n[1] 94.978\n\n\nFor each of Bob’s 1,000,000 observed scores we created a confidence interval (centered on the observed score). Then, we determined the percentage of the 1,000,000 confidence intervals that included Bob’s true score. We found that 94.98% of them captured his true score. Thus, a 95% SEM confidence interval, centered on the estimated true scores (\\(\\hat{y}_{true}\\)), DOES capture the test taker’s true score at the specified probability.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Four Measurement Myths</span>"
+    ]
+  },
+  {
+    "objectID": "myths.html#myth-2-standard-error-of-measurement-captures-a-test-takers-future-observed-scores",
+    "href": "myths.html#myth-2-standard-error-of-measurement-captures-a-test-takers-future-observed-scores",
+    "title": "7  Four Measurement Myths",
+    "section": "7.3 Myth 2: Standard error of measurement captures a test taker’s future observed scores",
+    "text": "7.3 Myth 2: Standard error of measurement captures a test taker’s future observed scores\nBe sure you have run all of the code in Myth Simulation Setup prior to the code below.\n\ncur_obs_for_bob = 80 # Recall Bob's true score is 90\n\nsem = sd_obs*sqrt(1-rxx)\nLL = cur_obs_for_bob - 1.96 * sem\nUL = cur_obs_for_bob + 1.96 * sem\n\nboolean_greater_LL  &lt;- all_bob_observed_scores &gt;= LL\nboolean_less_UL     &lt;- all_bob_observed_scores &lt;= UL\nboolean_in_interval &lt;- boolean_greater_LL & boolean_less_UL \n\nn_in_interval = sum(boolean_in_interval)\npercent_bob_observed_in_interval = n_in_interval / n_all_bob_observed_scores * 100\n\nprint(percent_bob_observed_in_interval)\n\n[1] 48.3613\n\n\nWe started with Bob having an observed score of 80 even though his true score is 90. We used Bob’s observed score (80) as the center for a 95% SEM [70.20, 89.80]. Then we examined the extent to which this interval captured Bob’s observed scores. We found the interval captured only 48.36% of Bob’s observed scores. Thus, a 95% SEM interval, centered on an observed score, does NOT capture the specified percentage of future observed scores.\nFurthermore, recall that Bob’s observed scores ranged from 66 to 113. We can re-run the simulation was using cur_obs_for_bob = 66 or cur_obs_for_bob = 113. If re-run the above simulation using these values we find capture rates of 0.22% and 0.40%, respectively. Thus, the further an observed score is from the true score the worse the interval performs at capturing future observed scores.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Four Measurement Myths</span>"
+    ]
+  },
+  {
+    "objectID": "myths.html#myth-3-using-an-estimated-true-score-provides-an-interval-that-capture-future-observed-scores",
+    "href": "myths.html#myth-3-using-an-estimated-true-score-provides-an-interval-that-capture-future-observed-scores",
+    "title": "7  Four Measurement Myths",
+    "section": "7.4 Myth 3: Using an Estimated True Score Provides an Interval that Capture Future Observed Scores",
+    "text": "7.4 Myth 3: Using an Estimated True Score Provides an Interval that Capture Future Observed Scores\nBe sure you have run all of the code in Myth Simulation Setup prior to the code below.\n\ncur_obs_for_bob = 80 # Recall Bob's true score is 90\n# cur_obs_for_bob = 113 # Recall Bob's true score is 90\n\nyhat_true_score = mean_obs + rxx*(cur_obs_for_bob - mean_obs)\nsem = sd_obs*sqrt(1-rxx)\n\nLL = yhat_true_score - 1.96 * sem\nUL = yhat_true_score + 1.96 * sem\n\nboolean_greater_LL  &lt;- all_bob_observed_scores &gt;= LL\nboolean_less_UL     &lt;- all_bob_observed_scores &lt;= UL\nboolean_in_interval &lt;- boolean_greater_LL & boolean_less_UL \n\nn_in_interval = sum(boolean_in_interval)\npercent_bob_observed_in_interval = n_in_interval / n_all_bob_observed_scores * 100\n\nprint(percent_bob_observed_in_interval)\n\n[1] 77.5519\n\n\nWe started with Bob having an observed score of 80 even though his true score is 90. We calculated an estimated true score (i.e., \\(\\hat{y}_{true} = 84.00\\)). This value is the estimated mean true score for all test takers with an observed score of 80.00. We use \\(\\hat{y}_{true} =  84.00\\)) as the center for a 95% SEM [74.20, 93.80]. Then we examined the extent to which this interval captured Bob’s observed scores. We found the interval captured only 77.55% of Bob’s observed scores. Thus, a 95% SEM interval, centered on the estimated true score, does NOT capture the specified percentage of future observed scores.\nOnce again, recall that Bob’s observed scores ranged from 66 to 113. We can re-run the simulation was using cur_obs_for_bob = 66 or cur_obs_for_bob = 113. If re-run the above simulation using these values we find capture rates of 6.97% and 1.71%, respectively. Thus, the further an observed score is from the true score the worse the interval performs at capturing future observed scores.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Four Measurement Myths</span>"
+    ]
+  },
+  {
+    "objectID": "myths.html#myth-4-using-a-estimated-true-score-provides-an-interval-that-captures-true-scores",
+    "href": "myths.html#myth-4-using-a-estimated-true-score-provides-an-interval-that-captures-true-scores",
+    "title": "7  Four Measurement Myths",
+    "section": "7.5 Myth 4: Using a Estimated True Score Provides an Interval that Captures True Scores",
+    "text": "7.5 Myth 4: Using a Estimated True Score Provides an Interval that Captures True Scores\nBe sure you have run all of the code in Myth Simulation Setup prior to the code below.\n\nis_bob_true_score_in_interval = rep(FALSE, n_all_bob_observed_scores)\n\nfor (i in 1:n_all_bob_observed_scores) {\n  cur_observed_for_bob &lt;- all_bob_observed_scores[i]\n  yhat_true = mean_obs + rxx*(cur_observed_for_bob - mean_obs)\n\n  sem = sd_obs*sqrt(1-rxx)\n  LL = yhat_true - 1.96 * sem\n  UL = yhat_true + 1.96 * sem\n\n  if (bob_true_score &lt;= UL) {\n    if (bob_true_score &gt;= LL) {\n        is_bob_true_score_in_interval[i] &lt;- TRUE\n    }\n  }  \n}\n\nn_bob_true_score_in_interval &lt;- sum(is_bob_true_score_in_interval)\n\npercent_true_score_in_interval &lt;- n_bob_true_score_in_interval / n_all_bob_observed_scores * 100\nprint(percent_true_score_in_interval)\n\n[1] 97.2628\n\n\nFor each of Bob’s 1,000,000 observed scores we calculated a predicted true score (\\(\\hat{y}_{true}\\)). Recall, this predicted true score value is the mean true score for all test takers that share Bob’s observed score. We used this predicted mean true score as the center for a 95% SEM confidence interval. Then, we determined the percentage of the 1,000,000 confidence intervals that included Bob’s true score. We found that 97.26% of them captured his true score. Thus, a 95% SEM confidence interval, centered on the predicted mean true scores (\\(\\hat{y}_{true}\\)), does NOT capture the test taker’s true score at the specified probability. Consequently, a Standard Error of Measurement interval for a single test taker should be centered on the test taker’s observed score not a predicted true score.",
+    "crumbs": [
+      "<span class='chapter-number'>7</span>  <span class='chapter-title'>Four Measurement Myths</span>"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Activities: The Comedy of Measurement Errors by David J. Stanley and Jeffrey R. Spence",
+    "section": "",
+    "text": "Preface\nThis is a Quarto book created to present supplemental activities for the article “The Comedy of Measurement Errors” by David J. Stanley and Jeffrey R. Spence.",
+    "crumbs": [
+      "Preface"
+    ]
+  }
+]

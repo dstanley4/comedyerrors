@@ -1,0 +1,26 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Activities: The Comedy of Measurement Errors by David J. Stanley and Jeffrey R. Spence"
+  author: "David J. Stanley & Jeffrey R. Spence"
+  chapters:
+    - index.qmd
+    - setup.qmd
+    - classical_test.qmd
+    - bivariate_regression.qmd
+    - see_many.qmd
+    - sem_many.qmd
+    - sem_single.qmd
+    - myths.qmd
+
+format:
+  html:
+    grid:
+      body-width: 1000px
+    theme: cosmo
+    toc-depth: 5
+
+editor: visual
+

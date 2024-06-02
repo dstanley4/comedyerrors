@@ -1,0 +1,66 @@
+# Create Data for Activities
+
+## Install packages
+
+A few R package are needed for these activities. The install.package() commands below only needs to be run once per machine.
+
+```{r}
+#| eval: false
+
+install.packages("tidyverse", dep = TRUE)
+install.packages("broom", dep = TRUE)
+install.packages("MASS", dep = TRUE)
+```
+
+## Activate packages
+
+The library() commands below need to be run during each R session -- they activate the packages:
+
+```{r}
+#| eval: false
+
+library(tidyverse)
+library(broom)
+library(MASS)
+```
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(broom)
+library(MASS)
+```
+
+## Create Demonstration Data
+
+Classical test theory is a population-level theory. Consequently, in these demonstrations we use a large number of test takers (i.e., 1,000,000 test takers). In the code below we create true score and random meansurement errors. The true scores have mean of 100 and a standard deviation of 10; which is a variance of 100. Errors have a mean of zero and a standard deviation of 5; which is a variance of 25. The standard deviation of 5 for the errors represents the Standard Error of Measurement - as will become evident later in these activities. An assumption of classical test theory is that the errors are uncorrelated with true scores. We create data below based on this assumption -- a covariance of zero is consistent with a correlation of zero.
+
+```{r}
+# Mean of 100 for true score and mean of 0 for errors
+means = c(100,0)
+
+# Specify variances and covariances. 
+# A covariance of zero means the correlation between
+# true scores and errors is zero. The 100 indicates a
+# variance of 100 for true scores. The 25 indicates
+# a variance of 25 for errors.
+covariance_matrix = matrix(c(100,0, 0,25), nrow = 2)
+
+# Create the score as per specifications
+set.seed(1) # random number seed
+scores <- mvrnorm(n = 1000000,
+                  mu = means,
+                  Sigma = covariance_matrix,
+                  empirical = TRUE)
+
+true  <- scores[,1]
+error <- scores[,2]
+observed <- true + error
+```
+
+As noted, an assumption of classical test theory is that true scores and errors are uncorrelated. We confirm this below:
+
+```{r}
+cor(true, error)
+```

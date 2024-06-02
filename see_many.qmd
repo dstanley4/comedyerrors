@@ -1,0 +1,354 @@
+# SEE-Many-Test-Takers Interval
+
+```{r}
+#| include: false
+library(tidyverse)
+library(broom)
+library(MASS)
+
+means = c(100,0)
+
+covariance_matrix = matrix(c(100,0, 0,25), nrow = 2)
+
+set.seed(1) 
+scores <- mvrnorm(n = 1000000,
+                  mu = means,
+                  Sigma = covariance_matrix,
+                  empirical = TRUE)
+
+true  <- scores[,1]
+error <- scores[,2]
+observed <- true + error
+```
+
+In this section, with the Standard Error of Estimation (SEE), we create a 95% SEE regression interval that will capture 95% of the true scores for test takers with the same observed score. In this demonstration we create a 95% SEE interval based on an observed score of 90.
+
+Again note that in an applied context, we do not know true score so a regression model like the one below cannot be created. This regression model between true score and observed scores is a presented as a way to understand the conceptual basis for the Standard Error of Estimation interval.
+
+## SEE Regression Model
+
+Previously, we created true scores and errors as data for this demonstration. Recall that the reliability of these observed scores is $r_{xx}=.80$.
+
+```{r}
+rxx = var(true)/var(observed)
+print(rxx)
+```
+
+Now we create the Standard Error of Estimation regression model. In this model, observed scores predict true scores. Notice the slope corresponds to the reliability in the Standard Error of Estimation regression model. This correspondence between slope and reliability does not occur with the Standard Error of Measurement regression model.
+
+```{r}
+see_model <- lm(true ~ observed)
+print(see_model)
+```
+
+This output above indicates the regression equation:
+
+$$
+\hat{y}_{true} = .80(x_{observed}) + 20
+$$
+
+## Graphing the SEE Model
+
+We graph the relation between observed scores and true scores with the code below. Warning: This make take a few minutes to plot.
+
+```{r, eval = FALSE}
+# view model and predicted values
+library(ggplot2)
+example_df <- data.frame(true, observed)
+
+ggplot(data = my_df,
+       mapping = aes(x = observed,
+                     y = true)) +
+  geom_point(color = "grey") +
+  geom_smooth(method = lm,
+              formula = y ~ x,
+              color = "blue") +
+  ggtitle("SEE Regression Model") +
+  scale_x_continuous(breaks = seq(50, 150, by = 20)) +
+  theme_classic()
+```
+
+```{r, echo = FALSE, out.width="30%"}
+# view model and predicted values
+
+# library(ggplot2)
+# my_df <- data.frame(true, observed)
+# 
+# p2 = ggplot(data = my_df,
+#        mapping = aes(x = observed,
+#                      y = true)) +
+#   geom_point(color = "grey") +
+#   geom_smooth(method = lm,
+#               formula = y ~ x,
+#               color = "blue") +
+#   ggtitle("SEE Regression Model") +
+#   scale_x_continuous(breaks = seq(50, 150, by = 20)) +
+#   theme_classic()
+# 
+# ggsave("demonstration-plot-p2.png", plot = p2, height = 4, width = 4)
+
+knitr::include_graphics("demonstration-plot-p2.png")
+
+```
+
+## Predicted Values With the Regression Equation
+
+The output above indicated the regression equation:
+
+$$
+\hat{y}_{true} = .80(x_{observed}) + 20
+$$
+
+This equation equation is used to generate the values on the regression line in graph above. Example calculation for a spot on the regression line corresponding to an observed score of 90:
+
+$$
+\begin{aligned}
+\hat{y}_{true} &= .80(x_{observed}) + 20\\
+&= .80(90) + 20\\
+&= 92
+\end{aligned}
+$$
+
+This predicted value is an estimate of the mean true score for those test takers with an observed score of 90.
+
+Keep in mind, however, that in a applied measurement context, don't know true scores. Consequently, we cannot generate a regression between true scores and observed scores. This means we don't know the intercept in the regression equation. As a result, in any applied context we will not have have the full regression equation so this calculation is not possible.
+
+## Predicted Values Without the Regression Equation
+
+In an applied measurement context, we will know the reliability and the mean of the observed scores. This allows us to use an alternative approach to create $\hat{y}_{true}$-values.
+
+We create a predicted true score (i.e., $\hat{y}_{true}$) based on an observed score, the mean observed score, and the reliability (i.e., slope):
+
+$$
+\hat{y}_{true} = \overline{observed} + r_{xx} (observed - \overline{observed})
+$$
+
+We obtain a predicted true score (i.e., $\hat{y}-value$) of approximately 92 using the equation below based on an observed score of 90. Again, this predicted value is an estimate of the mean true score for those test takers with an observed score of 90.
+
+```{r}
+yhat = mean(observed) + rxx*(90 - mean(observed))
+print(yhat)
+```
+
+When we create a Standard Error of Estimation interval for test takers, based on an observed score of 90, it is centered on $\hat{y}=`r yhat`$.
+
+This spot on the regression line is illustrated in the graph below by the red dot:
+
+```{r}
+#| eval: false
+
+# view model and predicted values
+library(ggplot2)
+example_df <- data.frame(true, observed)
+
+ggplot(data = my_df,
+       mapping = aes(x = observed,
+                     y = true)) +
+  geom_point(color = "grey") +
+  geom_smooth(method = lm,
+              formula = y ~ x,
+              color = "blue") +
+  ggtitle("SEE Regression Model") +
+  scale_x_continuous(breaks = seq(50, 150, by = 20)) +
+  theme_classic() +
+  annotate(geom = "point",
+           x = 90, y = 92,
+           color = "red", size = 4)
+```
+
+```{r}
+#| echo: false
+
+# view model and predicted values
+#library(ggplot2)
+# example_df <- data.frame(true, observed)
+# 
+# p2b = ggplot(data = my_df,
+#        mapping = aes(x = observed,
+#                      y = true)) +
+#   geom_point(color = "grey") +
+#   geom_smooth(method = lm,
+#               formula = y ~ x,
+#               color = "blue") +
+#   ggtitle("SEE Regression Model") +
+#   scale_x_continuous(breaks = seq(50, 150, by = 20)) +
+#   theme_classic() +
+#   annotate(geom = "point", x = 90, y = 92, color = "red", size = 4)
+# 
+# ggsave("demonstration-plot-p2b.png", plot = p2b, height = 4, width = 4)
+
+knitr::include_graphics("demonstration-plot-p2b.png")
+
+```
+
+## SEE Errors
+
+The length of the interval depends on the standard deviation of the residuals around the corresponding spot on the regression line (i.e., the red dot in the graph above). Due to the homoscedasticity assumption the standard deviation of the residuals at that point is equal to the overall standard deviation of the residuals. We obtain the overall standard deviation of the residuals in R output by looking at "Residual Standard Error". Notice that this value is 4.47 in the output below.
+
+```{r}
+summary(see_model)
+```
+
+Notice that we can get an estimate of this value from the SEE-error formula. We use the value below in our Standard Error of Estimation interval calculation.
+
+```{r}
+sd_residual_see = sd(observed)*sqrt( (1-rxx)*rxx)
+print(sd_residual_see)
+```
+
+## SEE Interval
+
+Recall, we started with the intent to make a Standard Error of Estimation interval based on an observed score of 90. Using this, in the above activities, we estimated $\hat{y}$ (the center of the interval) and $s_{residual}$ which determined the length of the interval:
+
+```{r}
+print(yhat)
+print(sd_residual_see)
+```
+
+We use these values to calculate the lower limit of the interval:
+
+```{r}
+seeLL = yhat - 1.96 * sd_residual_see
+print(seeLL)
+```
+
+Likewise we calculate the upper limit of the interval:
+
+```{r}
+seeUL = yhat + 1.96 * sd_residual_see
+print(seeUL)
+```
+
+The result is the 95% SEE \[`r round(seeLL,2)`, `r round(seeUL,2)`\] interval. This interval is a range that indicates that for those test takers with an observed score of 90 that 95% of them have true scores between `r round(seeLL,2)` and `r round(seeUL,2)`.
+
+```{r, eval = FALSE}
+# view model and predicted values
+library(ggplot2)
+my_df <- data.frame(true, observed)
+
+ggplot(data = my_df,
+       mapping = aes(x = observed,
+                     y = true)) +
+  geom_point(color = "grey") +
+  geom_smooth(method = lm,
+              formula = y ~ x,
+              color = "blue") +
+  ggtitle("SEE Regression Model") +
+  scale_x_continuous(breaks = seq(50, 150, by = 20)) +
+  theme_classic() +
+  annotate(geom = "point",
+           x = 90, y = 92,
+           color = "red", size = 4) +
+  annotate(geom = "segment",
+           x = 90, xend = 90,
+           y = 83.23, yend = 100.77,
+           color = "red", linewidth = 1)
+```
+
+```{r}
+#| echo: false
+
+# view model and predicted values
+# library(ggplot2)
+my_df <- data.frame(true, observed)
+
+# p2c = ggplot(data = my_df,
+#        mapping = aes(x = observed,
+#                      y = true)) +
+#   geom_point(color = "grey") +
+#   geom_smooth(method = lm,
+#               formula = y ~ x,
+#               color = "blue") +
+#   ggtitle("SEE Regression Model") +
+#   scale_x_continuous(breaks = seq(50, 150, by = 20)) +
+#   theme_classic() +
+#   annotate(geom = "point",
+#            x = 90, y = 92,
+#            color = "red", size = 4) +
+#   annotate(geom = "segment",
+#            x = 90, xend = 90,
+#            y = 83.23, yend = 100.77,
+#            color = "red", linewidth = 1)
+# 
+# ggsave("demonstration-plot-p2c.png", plot = p2c, height = 4, width = 4)
+
+knitr::include_graphics("demonstration-plot-p2c.png")
+
+```
+
+Unfortunately, the above graph makes it appear the 95% SEE interval falls far short of capturing 95% of the true scores corresponding to the $x-axis$ observed score location of 90. This is occurs because the above plot does not convey the density of the points in the cross section where the interval falls on the graph.
+
+However, if we take a cross section of the data at this point, we can see the interval does capture 95% of the points at this spot on the graph.
+
+```{r}
+#| eval: false
+
+people_with_obs_equal_90 <- round(observed) == 90
+
+my_df_hist <- data.frame(true_scores = true[people_with_obs_equal_90])
+
+ggplot(data = my_df_hist,
+       mapping = aes(x =true_scores)) +
+  geom_histogram() +
+  xlab("Trues Scores for People With Observed = 90") +
+  ylab("Frequency") +
+  scale_x_continuous(breaks = seq(60, 110, by = 2)) +
+  ggtitle("SEE Regression Model: Cross Section") +
+  theme_classic() +
+  annotate(geom = "point",
+           x = 92, y = 100,
+           color = "red", size = 4) +
+  annotate(geom = "segment",
+           y = 100, yend = 100,
+           x = 83.23, yend = 100.77,
+           color = "red", linewidth = 1)
+```
+
+```{r}
+#| echo: false
+
+# people_with_obs_equal_90 <- round(observed) == 90
+# 
+# my_df_hist <- data.frame(true_scores = true[people_with_obs_equal_90])
+# 
+# p2d <- ggplot(data = my_df_hist,
+#        mapping = aes(x =true_scores)) +
+#   geom_histogram() +
+#   xlab("Trues Scores for People With Observed = 90") +
+#   ylab("Frequency") +
+#   scale_x_continuous(breaks = seq(60, 110, by = 2)) +
+#   ggtitle("SEE Regression Model: Cross Section") +
+#   theme_classic() +
+#   annotate(geom = "point",
+#            x = 92, y = 100,
+#            color = "red", size = 4) +
+#   annotate(geom = "segment",
+#            y = 100, yend = 100,
+#            x = 83.23, yend = 100.77
+#            color = "red", linewidth = 1)
+# 
+# ggsave("demonstration-plot-p2d.png", plot = p2d, height = 3, width = 6)
+
+knitr::include_graphics("demonstration-plot-p2d.png")
+
+```
+
+A visual inspection suggest the interval does capture 95% of values. We can confirm our visual inspection of the above graph with a calculation:
+
+```{r}
+people_with_obs_equal_90 <- round(observed) == 90
+true_scores_people_with_obs_equal_90 = true[people_with_obs_equal_90]
+n_true_scores_for_obs_90 = length(true_scores_people_with_obs_equal_90)
+
+boolean_greater_LL  <- true_scores_people_with_obs_equal_90 >= seeLL
+boolean_less_UL     <- true_scores_people_with_obs_equal_90 <= seeUL
+boolean_in_interval <- boolean_greater_LL & boolean_less_UL 
+
+n_in_interval = sum(boolean_in_interval)
+percent_true_in_interval = n_in_interval / n_true_scores_for_obs_90 * 100
+
+print(percent_true_in_interval)
+
+```
+
+Thus, the 95% SEE \[83.24, 100.74\] captures 95% of the true scores for individuals with an observed score of 90.

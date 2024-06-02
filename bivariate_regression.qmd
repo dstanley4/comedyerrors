@@ -1,0 +1,135 @@
+# Bivariate Regression: A Lens for Understanding Intervals
+
+```{r}
+#| include: false
+library(tidyverse)
+library(broom)
+library(MASS)
+
+means = c(100,0)
+
+covariance_matrix = matrix(c(100,0, 0,25), nrow = 2)
+
+set.seed(1) 
+scores <- mvrnorm(n = 1000000,
+                  mu = means,
+                  Sigma = covariance_matrix,
+                  empirical = TRUE)
+
+true  <- scores[,1]
+error <- scores[,2]
+observed <- true + error
+```
+
+## Model
+
+We make a regression predicting $y$ using $x$ with the code below. Notice the regression line has a slope of .80 and an intercept of 20.
+
+```{r}
+# Will use the generic labels of y and x in the regression demonstration
+# We create variables with these labels
+y <- true
+x <- observed
+
+# Create the regression model relating x to y using the lm() command. lm() is linear model.
+my_model <- lm(y ~ x)
+print(my_model)
+```
+
+### Using the Model: Predicted Values
+
+We graph the relation between $x$-values and $y$-values with the code below. We include the regression line described in the output above using the geom_smooth() command. Warning: This make take a few minutes to plot.
+
+```{r}
+#| eval: false
+
+# Create a data frame (spreadsheet style) version of the data
+my_df <- data.frame(y, x)
+
+# Plot the data and use geom_smooth() 
+# to show regression line
+ggplot(data = my_df,
+       mapping = aes(x = x,
+                     y = y)) +
+  geom_point(color = "grey") +
+  geom_smooth(method = lm,
+              formula = y ~ x,
+              color = "blue") +
+  theme_classic(18)
+```
+
+```{r}
+#| echo: false
+
+# view model and predicted values
+# library(ggplot2)
+# my_df <- data.frame(y, x)
+# 
+# p1 <- ggplot(data = my_df,
+#        mapping = aes(x = x,
+#                      y = y)) +
+#   geom_point(color = "grey") +
+#   geom_smooth(method = lm,
+#               formula = y ~ x,
+#               color = "blue") +
+#   theme_classic(18)
+# 
+# ggsave("demonstration-plot-p1.png", plot = p1, height = 4, width = 4)
+
+knitr::include_graphics("demonstration-plot-p1.png")
+```
+
+### Predicted Values With the Regression Equation
+
+Using $x=120$ we create a predicted value for $y$ (i.e., a $\hat{y}-value$) for the graph above. This predicted value is the spot on the regression line above $x=120$. We do so with knowledge of the full regression equation, including the intercept.
+
+```{r}
+b = 0.80 # the slope
+intercept = 20
+yhat = b*(120) + intercept
+print(yhat)
+```
+
+### Predicted Values Without the Regression Equation
+
+A predicted value can be created without a regression equation - as explained in the paper. As before, using $x=120$ we create a predicted value for $y$ (i.e., a $\hat{y}-value$) for the graph above. We do so WITHOUT knowledge of the full regression equation - we do not know the intercept but we do know the mean of $x$ and the mean of $y$. The regression line will always run through the point ($\bar{x}, \bar{y}$) - so this is used as a frame of reference. Because we do not know true scores in an applied context, we use this approach to generated predicted values for measurement intervals.
+
+```{r}
+b = 0.80 # the slope
+yhat = mean(y) + b*(120 - mean(x))
+print(yhat)
+```
+
+### Interpretion of Predicted Values
+
+The predicted value of $y$ (i.e., $\hat{y}-value$) is an **estimate** of the mean value of $y$ for those test takers with the specified value of $x$. In this example $x = 120$. For participants with score of 120 on the $x$-axis we calculate the mean value of their $y$ scores. We see the resulting mean is the same as the $\hat{y}-value$ above.
+
+```{r}
+people_with_x_equal_120 <- round(x) == 120
+
+# mean y-value for these people
+print( mean( y[people_with_x_equal_120] ) )
+
+```
+
+```{r, echo = FALSE}
+meanvalue = mean( y[people_with_x_equal_120] ) 
+```
+
+In the previous step, we estimated a mean $y$-value as $\hat{y}=116$ for people with an observed score of 120. In this simulation we correspondingly found a mean $y$-value of 116 (rounded).
+
+## Errors
+
+Notice in the output below that residual standard error is 4.47. This value is the standard deviation of the residuals around the regression line.
+
+```{r}
+summary(my_model)
+```
+
+We can obtain the same 4.47 value using the equation below. This equation is central to the derivation of the error equations for Standard Error of Estimation and Standard Error of Measurement.
+
+```{r}
+yhat_residual_sd_everyone = sd(y) * sqrt(1 - cor(x,y)^2) 
+
+print(yhat_residual_sd_everyone)
+```

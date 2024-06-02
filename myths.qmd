@@ -1,0 +1,164 @@
+# Four Measurement Myths
+
+## Myth Simulation Setup
+
+Recall, our simulation scenario where:
+
+```{r}
+mean_true = 100
+var_true = 100
+
+var_error = 25
+sd_error = sqrt(var_error)
+
+var_obs = var_true + var_error
+sd_obs = sqrt(var_obs)
+mean_obs = mean_true # because mean error is zero
+  
+#This corresponds to a reliability of .80 
+rxx = var_true/var_obs
+print(rxx)
+
+```
+
+Now, let's imagine Bob who has a true score of 90. Then, we create 1,000,000 observed scores for Bob.
+
+```{r}
+set.seed(1)
+
+bob_true_score = 90
+
+error <- as.numeric(scale(rnorm(n = 1000000)))*5
+
+all_bob_observed_scores <- bob_true_score + error
+
+```
+
+What is the range of Bob's observed scores? With a true score of 90 and a reliability of .80 Bob's observed score range from `r round(min(all_bob_observed_scores),5)` to `r round(max(all_bob_observed_scores),5)`.
+
+```{r}
+min_obs <- min(all_bob_observed_scores)
+print(min_obs)
+
+max_obs <- max(all_bob_observed_scores)
+print(max_obs)
+
+```
+
+## Myth 1: There is a 95% chance your true score is in your interval
+
+Be sure you have run all of the code in **Myth Simulation Setup** prior to the code below.
+
+```{r}
+n_all_bob_observed_scores <- length(all_bob_observed_scores)
+
+is_bob_true_score_in_interval = rep(FALSE, n_all_bob_observed_scores)
+
+for (i in 1:n_all_bob_observed_scores) {
+  cur_observed_for_bob <- all_bob_observed_scores[i]
+  
+  sem = sd_obs*sqrt(1-rxx)
+  LL = cur_observed_for_bob - 1.96 * sem
+  UL = cur_observed_for_bob + 1.96 * sem
+
+  if (bob_true_score <= UL) {
+    if (bob_true_score >= LL) {
+        is_bob_true_score_in_interval[i] <- TRUE
+    }
+  }  
+}
+
+n_bob_true_score_in_interval <- sum(is_bob_true_score_in_interval)
+
+
+percent_true_score_in_interval <- n_bob_true_score_in_interval / n_all_bob_observed_scores * 100
+print(percent_true_score_in_interval)
+
+```
+
+For each of Bob's 1,000,000 observed scores we created a confidence interval (centered on the observed score). Then, we determined the percentage of the 1,000,000 confidence intervals that included Bob's true score. We found that `r sprintf("%1.2f",percent_true_score_in_interval)`% of them captured his true score. Thus, a 95% SEM confidence interval, centered on the estimated true scores ($\hat{y}_{true}$), DOES capture the test taker's true score at the specified probability.
+
+## Myth 2: Standard error of measurement captures a test taker's future observed scores
+
+Be sure you have run all of the code in **Myth Simulation Setup** prior to the code below.
+
+```{r}
+cur_obs_for_bob = 80 # Recall Bob's true score is 90
+
+sem = sd_obs*sqrt(1-rxx)
+LL = cur_obs_for_bob - 1.96 * sem
+UL = cur_obs_for_bob + 1.96 * sem
+
+boolean_greater_LL  <- all_bob_observed_scores >= LL
+boolean_less_UL     <- all_bob_observed_scores <= UL
+boolean_in_interval <- boolean_greater_LL & boolean_less_UL 
+
+n_in_interval = sum(boolean_in_interval)
+percent_bob_observed_in_interval = n_in_interval / n_all_bob_observed_scores * 100
+
+print(percent_bob_observed_in_interval)
+```
+
+We started with Bob having an observed score of `r sprintf("%1.0f", cur_obs_for_bob)` even though his true score is `r sprintf("%1.0f", bob_true_score)`. We used Bob's observed score (`r sprintf("%1.0f", cur_obs_for_bob)`) as the center for a 95% SEM \[`r sprintf("%1.2f, %1.2f", LL, UL)`\]. Then we examined the extent to which this interval captured Bob's observed scores. We found the interval captured only `r sprintf("%1.2f", percent_bob_observed_in_interval)`% of Bob's observed scores. Thus, a 95% SEM interval, centered on an observed score, does NOT capture the specified percentage of future observed scores.
+
+Furthermore, recall that Bob's observed scores ranged from 66 to 113. We can re-run the simulation was using **cur_obs_for_bob = 66** or **cur_obs_for_bob = 113**. If re-run the above simulation using these values we find capture rates of 0.22% and 0.40%, respectively. Thus, the further an observed score is from the true score the worse the interval performs at capturing future observed scores.
+
+## Myth 3: Using an Estimated True Score Provides an Interval that Capture Future Observed Scores
+
+Be sure you have run all of the code in **Myth Simulation Setup** prior to the code below.
+
+```{r}
+cur_obs_for_bob = 80 # Recall Bob's true score is 90
+# cur_obs_for_bob = 113 # Recall Bob's true score is 90
+
+yhat_true_score = mean_obs + rxx*(cur_obs_for_bob - mean_obs)
+sem = sd_obs*sqrt(1-rxx)
+
+LL = yhat_true_score - 1.96 * sem
+UL = yhat_true_score + 1.96 * sem
+
+boolean_greater_LL  <- all_bob_observed_scores >= LL
+boolean_less_UL     <- all_bob_observed_scores <= UL
+boolean_in_interval <- boolean_greater_LL & boolean_less_UL 
+
+n_in_interval = sum(boolean_in_interval)
+percent_bob_observed_in_interval = n_in_interval / n_all_bob_observed_scores * 100
+
+print(percent_bob_observed_in_interval)
+
+```
+
+We started with Bob having an observed score of `r sprintf("%1.0f", cur_obs_for_bob)` even though his true score is `r sprintf("%1.0f", bob_true_score)`. We calculated an estimated true score (i.e., $\hat{y}_{true} = `r sprintf("%1.2f", yhat_true_score)`$). This value is the estimated mean true score for all test takers with an observed score of `r sprintf("%1.2f", cur_obs_for_bob)`. We use $\hat{y}_{true} =  `r sprintf("%1.2f", yhat_true_score)`$) as the center for a 95% SEM \[`r sprintf("%1.2f, %1.2f", LL, UL)`\]. Then we examined the extent to which this interval captured Bob's observed scores. We found the interval captured only `r sprintf("%1.2f", percent_bob_observed_in_interval)`% of Bob's observed scores. Thus, a 95% SEM interval, centered on the estimated true score, does NOT capture the specified percentage of future observed scores.
+
+Once again, recall that Bob's observed scores ranged from 66 to 113. We can re-run the simulation was using **cur_obs_for_bob = 66** or **cur_obs_for_bob = 113**. If re-run the above simulation using these values we find capture rates of 6.97% and 1.71%, respectively. Thus, the further an observed score is from the true score the worse the interval performs at capturing future observed scores.
+
+## Myth 4: Using a Estimated True Score Provides an Interval that Captures True Scores
+
+Be sure you have run all of the code in **Myth Simulation Setup** prior to the code below.
+
+```{r}
+is_bob_true_score_in_interval = rep(FALSE, n_all_bob_observed_scores)
+
+for (i in 1:n_all_bob_observed_scores) {
+  cur_observed_for_bob <- all_bob_observed_scores[i]
+  yhat_true = mean_obs + rxx*(cur_observed_for_bob - mean_obs)
+
+  sem = sd_obs*sqrt(1-rxx)
+  LL = yhat_true - 1.96 * sem
+  UL = yhat_true + 1.96 * sem
+
+  if (bob_true_score <= UL) {
+    if (bob_true_score >= LL) {
+        is_bob_true_score_in_interval[i] <- TRUE
+    }
+  }  
+}
+
+n_bob_true_score_in_interval <- sum(is_bob_true_score_in_interval)
+
+percent_true_score_in_interval <- n_bob_true_score_in_interval / n_all_bob_observed_scores * 100
+print(percent_true_score_in_interval)
+
+```
+
+For each of Bob's 1,000,000 observed scores we calculated a predicted true score ($\hat{y}_{true}$). Recall, this predicted true score value is the mean true score for all test takers that share Bob's observed score. We used this predicted mean true score as the center for a 95% SEM confidence interval. Then, we determined the percentage of the 1,000,000 confidence intervals that included Bob's true score. We found that `r sprintf("%1.2f",percent_true_score_in_interval)`% of them captured his true score. Thus, a 95% SEM confidence interval, centered on the predicted mean true scores ($\hat{y}_{true}$), does NOT capture the test taker's true score at the specified probability. Consequently, a Standard Error of Measurement interval for a single test taker should be centered on the test taker's observed score not a predicted true score.
